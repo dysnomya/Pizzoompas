@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Pizzoompas</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="map">Map</string>
+    <string name="mapDescription">Navigate to map</string>
+    <string name="aaa">ąąąąąąą</string>
+    <string name="aaaDescription">ąąąaaaaąąąą</string>
 </resources>

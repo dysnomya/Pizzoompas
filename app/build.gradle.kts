@@ -47,8 +47,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    // Android Maps Compose composables for the Maps SDK for Android
-    implementation(libs.maps.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -63,4 +61,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
+    // Android Maps Compose composables for the Maps SDK for Android
+    implementation(libs.maps.compose)
+    // Compose adaptive navigation suite
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.navigation.compose)
+    // Material 3
+    implementation(libs.androidx.material3)
+    // Material extended icons
+    implementation(libs.androidx.material.icons.extended)
+
+
 }

@@ -4,29 +4,73 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Fastfood
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.pizzoompas.map.Map
 import com.example.pizzoompas.ui.theme.PizzoompasTheme
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
+
 
 class MainActivity : ComponentActivity() {
+
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             PizzoompasTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Map()
+                val navController = rememberNavController()
+                val currentDestination by navController.currentBackStackEntryAsState()
+
+                NavigationSuiteScaffold(
+                    navigationSuiteItems = {
+                        AppDestinations.entries.forEach {
+                            item(
+                                icon = {
+                                    Icon(
+                                        it.icon,
+                                        contentDescription = stringResource(it.contentDescription)
+                                    )
+                                },
+                                label = { Text(stringResource(it.label)) },
+                                selected = currentDestination?.destination?.route == it.route,
+                                onClick = {
+                                    navController.navigate(it.route) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            )
+                        }
+                    },
+
+                    ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = AppDestinations.MAP.route
+                    ) {
+                        composable(AppDestinations.MAP.route) {
+                            Map()
+                        }
+
+                        composable(AppDestinations.EMPTY.route) {
+                            EmptyShit()
+                        }
+                    }
                 }
             }
         }
@@ -34,22 +78,16 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Map() {
-    val singapore = LatLng(1.35, 103.87)
-    val singaporeMarkerState = rememberMarkerState(position = singapore)
+fun EmptyShit() {
+    Text("Hiiii")
+}
 
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(singapore, 10f)
-    }
-
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState
-    ) {
-        Marker(
-            state = singaporeMarkerState,
-            title = "Singapore",
-            snippet = "Market in Singapore"
-        )
-    }
+enum class AppDestinations(
+    @StringRes val label: Int,
+    val icon: ImageVector,
+    @StringRes val contentDescription: Int,
+    val route: String
+) {
+    MAP(R.string.map, Icons.Outlined.Map, R.string.mapDescription, "map_route"),
+    EMPTY(R.string.aaa, Icons.Outlined.Fastfood, R.string.aaaDescription, "aaa_route"),
 }
