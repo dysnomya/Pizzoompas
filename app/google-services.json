@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "33086466437",
+    "project_id": "pizzoompas",
+    "storage_bucket": "pizzoompas.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33086466437:android:9c7711ef0503cea8293cec",
+        "android_client_info": {
+          "package_name": "com.example.pizzoompas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl045irzhEtbCgCxSgELlwLfeQjI3EgIk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
