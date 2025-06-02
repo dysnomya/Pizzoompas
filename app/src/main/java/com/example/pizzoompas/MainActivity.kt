@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Accessibility
 import androidx.compose.material.icons.outlined.Fastfood
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -70,6 +71,10 @@ class MainActivity : ComponentActivity() {
                         composable(AppDestinations.EMPTY.route) {
                             EmptyShit()
                         }
+
+                        composable(AppDestinations.PIZZA.route) {
+                            EmptyShit()
+                        }
                     }
                 }
             }
@@ -90,4 +95,5 @@ enum class AppDestinations(
 ) {
     MAP(R.string.map, Icons.Outlined.Map, R.string.mapDescription, "map_route"),
     EMPTY(R.string.aaa, Icons.Outlined.Fastfood, R.string.aaaDescription, "aaa_route"),
+    PIZZA(R.string.pizza, Icons.Outlined.Accessibility, R.string.pizzaDescription, "pizza_route")
 }

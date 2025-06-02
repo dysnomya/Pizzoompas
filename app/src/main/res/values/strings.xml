@@ -5,4 +5,6 @@
     <string name="mapDescription">Navigate to map</string>
     <string name="aaa">ąąąąąąą</string>
     <string name="aaaDescription">ąąąaaaaąąąą</string>
+    <string name="pizza">pizza</string>
+    <string name="pizzaDescription">good pizza</string>
 </resources>

@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.play.services.maps)
+    implementation(libs.places)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
@@ -61,6 +62,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.material)
+
 
 
     // Android Maps Compose composables for the Maps SDK for Android
