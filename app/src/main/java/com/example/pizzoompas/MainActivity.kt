@@ -23,7 +23,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.pizzoompas.map.Map
 import com.example.pizzoompas.ui.theme.PizzoompasTheme
+import com.example.pizzoompas.utils.ManifestUtils
 import com.example.pizzoompas.viewmodel.MapViewModel
+import com.google.android.libraries.places.api.Places
 
 
 class MainActivity : ComponentActivity() {
@@ -32,7 +34,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
+        // Retrieve the API key from the manifest file
+        val apiKey = ManifestUtils.getApiKeyFromManifest(this)
+        // Initialize the Places API with the retrieved API key
+        if (!Places.isInitialized() && apiKey != null) {
+            Places.initialize(applicationContext, apiKey)
+        }
         setContent {
             PizzoompasTheme {
                 val navController = rememberNavController()
