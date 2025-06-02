@@ -63,7 +63,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
-
+    implementation(libs.timber)
 
 
     // Android Maps Compose composables for the Maps SDK for Android

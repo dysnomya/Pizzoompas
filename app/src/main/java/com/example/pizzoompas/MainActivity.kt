@@ -23,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.pizzoompas.map.Map
 import com.example.pizzoompas.ui.theme.PizzoompasTheme
+import com.example.pizzoompas.viewmodel.MapViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -36,6 +37,7 @@ class MainActivity : ComponentActivity() {
             PizzoompasTheme {
                 val navController = rememberNavController()
                 val currentDestination by navController.currentBackStackEntryAsState()
+                val mapViewModel = MapViewModel()
 
                 NavigationSuiteScaffold(
                     navigationSuiteItems = {
@@ -65,7 +67,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = AppDestinations.MAP.route
                     ) {
                         composable(AppDestinations.MAP.route) {
-                            Map()
+                            Map(mapViewModel)
                         }
 
                         composable(AppDestinations.EMPTY.route) {
