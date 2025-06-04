@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -17,20 +15,17 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.pizzoompas.viewmodel.MapViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import com.example.pizzoompas.components.SearchBar
 import com.google.maps.android.compose.MarkerState
 import timber.log.Timber
 
 @Composable
-fun Map(mapViewModel: MapViewModel) {
+fun MapScreen(mapViewModel: MapViewModel) {
     // Initialize the camera position state, which controls the camera's position on the map
     val cameraPositionState = rememberCameraPositionState()
     // Obtain the current context
@@ -40,6 +35,7 @@ fun Map(mapViewModel: MapViewModel) {
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     // Observe the selected location from the ViewModel
     val selectedLocation by mapViewModel.selectedLocation
+    val closestPizzeria by mapViewModel.closestPizzeria
 
     // Handle permission requests for accessing fine location
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -74,12 +70,20 @@ fun Map(mapViewModel: MapViewModel) {
         Spacer(modifier = Modifier.height(18.dp)) // Add a spacer with a height of 18dp to push the search bar down
 
         // Add the search bar component
-        SearchBar(
-            onPlaceSelected = { place ->
-                // When a place is selected from the search bar, update the selected location
-                mapViewModel.selectLocation(place, context)
-            }
-        )
+//        SearchBar(
+//            onPlaceSelected = { place ->
+//                // When a place is selected from the search bar, update the selected location
+//                mapViewModel.selectLocation(place, context)
+//            }
+//        )
+//        Button(
+//            modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+//            onClick = {
+//                findClosestPizzeria(userLocation!!.latitude, userLocation!!.longitude, context, mapViewModel)
+//            }
+//        ) {
+//            Text("Find nearest pizzeria!")
+//        }
 
         // Display the Google Map
         GoogleMap(
@@ -103,6 +107,16 @@ fun Map(mapViewModel: MapViewModel) {
                     state = MarkerState(position = it), // Place the marker at the selected location
                     title = "Selected Location", // Set the title for the marker
                     snippet = "This is the place you selected." // Set the snippet for the marker
+                )
+                // Move the camera to the selected location with a zoom level of 15f
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
+            }
+
+            closestPizzeria?.let {
+                Marker(
+                    state = MarkerState(position = it), // Place the marker at the selected location
+                    title = "Closest pizzeria", // Set the title for the marker
+                    snippet = "This pizzeria is the closest to your location." // Set the snippet for the marker
                 )
                 // Move the camera to the selected location with a zoom level of 15f
                 cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)

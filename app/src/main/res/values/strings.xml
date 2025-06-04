@@ -3,8 +3,8 @@
     <string name="title_activity_maps">MapsActivity</string>
     <string name="map">Map</string>
     <string name="mapDescription">Navigate to map</string>
-    <string name="aaa">ąąąąąąą</string>
-    <string name="aaaDescription">ąąąaaaaąąąą</string>
-    <string name="pizza">pizza</string>
-    <string name="pizzaDescription">good pizza</string>
+    <string name="home">Home</string>
+    <string name="homeDescription">Navigate to home</string>
+    <string name="compass">Compass</string>
+    <string name="compassDescription">Navigate to compass</string>
 </resources>

@@ -5,26 +5,39 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Accessibility
+import androidx.compose.material.icons.outlined.CompassCalibration
 import androidx.compose.material.icons.outlined.Fastfood
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.pizzoompas.map.Map
+import com.example.pizzoompas.map.MapScreen
 import com.example.pizzoompas.ui.theme.PizzoompasTheme
 import com.example.pizzoompas.utils.ManifestUtils
+import com.example.pizzoompas.utils.findClosestPizzeria
 import com.example.pizzoompas.viewmodel.MapViewModel
+import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
 
 
@@ -40,11 +53,11 @@ class MainActivity : ComponentActivity() {
         if (!Places.isInitialized() && apiKey != null) {
             Places.initialize(applicationContext, apiKey)
         }
+        val mapViewModel = MapViewModel()
         setContent {
             PizzoompasTheme {
                 val navController = rememberNavController()
                 val currentDestination by navController.currentBackStackEntryAsState()
-                val mapViewModel = MapViewModel()
 
                 NavigationSuiteScaffold(
                     navigationSuiteItems = {
@@ -74,15 +87,15 @@ class MainActivity : ComponentActivity() {
                         startDestination = AppDestinations.MAP.route
                     ) {
                         composable(AppDestinations.MAP.route) {
-                            Map(mapViewModel)
+                            MapScreen(mapViewModel)
                         }
 
-                        composable(AppDestinations.EMPTY.route) {
-                            EmptyShit()
+                        composable(AppDestinations.HOME.route) {
+                            HomeScreen(mapViewModel)
                         }
 
-                        composable(AppDestinations.PIZZA.route) {
-                            EmptyShit()
+                        composable(AppDestinations.COMPASS.route) {
+                            CompassScreen(mapViewModel)
                         }
                     }
                 }
@@ -91,9 +104,40 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Te dwa widoki sie potem przeniesie do osobnych plików czy coś
+
 @Composable
-fun EmptyShit() {
-    Text("Hiiii")
+fun HomeScreen(mapViewModel: MapViewModel) {
+    val context = LocalContext.current
+    val userLocation by mapViewModel.userLocation
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    mapViewModel.fetchUserLocation(context, fusedLocationClient)
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(200.dp))
+        Button(
+            onClick = {
+                findClosestPizzeria(userLocation!!.latitude, userLocation!!.longitude, context, mapViewModel)
+            }
+        ) {
+            Text("Find nearest pizzeria!")
+        }
+    }
+}
+
+@Composable
+fun CompassScreen(mapViewModel: MapViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(200.dp))
+        Text("Hiii")
+    }
 }
 
 enum class AppDestinations(
@@ -103,6 +147,7 @@ enum class AppDestinations(
     val route: String
 ) {
     MAP(R.string.map, Icons.Outlined.Map, R.string.mapDescription, "map_route"),
-    EMPTY(R.string.aaa, Icons.Outlined.Fastfood, R.string.aaaDescription, "aaa_route"),
-    PIZZA(R.string.pizza, Icons.Outlined.Accessibility, R.string.pizzaDescription, "pizza_route")
+    HOME(R.string.home, Icons.Outlined.Home, R.string.homeDescription, "home_route"),
+    COMPASS(R.string.compass, Icons.Outlined.CompassCalibration, R.string.compassDescription, "compass_route")
+
 }

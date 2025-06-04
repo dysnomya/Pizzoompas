@@ -25,6 +25,9 @@ class MapViewModel : ViewModel() {
     private val _selectedLocation = mutableStateOf<LatLng?>(null)
     val selectedLocation: State<LatLng?> = _selectedLocation
 
+    private val _closestPizzeria = mutableStateOf<LatLng?>(null)
+    val closestPizzeria: State<LatLng?> = _closestPizzeria
+
     // Function to fetch the user's location and update the state
     fun fetchUserLocation(context: Context, fusedLocationClient: FusedLocationProviderClient) {
         // Check if the location permission is granted
@@ -62,6 +65,12 @@ class MapViewModel : ViewModel() {
             } else {
                 Timber.tag("MapScreen").e("No location found for the selected place.")
             }
+        }
+    }
+
+    fun setClosestPizzeriaLatLng(lat: Double, lng: Double) {
+        viewModelScope.launch {
+            _closestPizzeria.value = LatLng(lat, lng)
         }
     }
 }
