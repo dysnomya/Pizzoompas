@@ -2,4 +2,9 @@
 <resources>
 
     <style name="Theme.Pizzoompas" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Pizzoompas.Splash" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Pizzoompas</item>
+    </style>
 </resources>

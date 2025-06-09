@@ -5,10 +5,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInBack
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseOutExpo
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CompassCalibration
 import androidx.compose.material.icons.outlined.Fastfood
@@ -17,17 +29,28 @@ import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -39,6 +62,8 @@ import com.example.pizzoompas.utils.findClosestPizzeria
 import com.example.pizzoompas.viewmodel.MapViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
+import kotlinx.coroutines.delay
+import com.example.pizzoompas.components.SplashScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -46,6 +71,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         enableEdgeToEdge()
         // Retrieve the API key from the manifest file
         val apiKey = ManifestUtils.getApiKeyFromManifest(this)
@@ -58,44 +84,54 @@ class MainActivity : ComponentActivity() {
             PizzoompasTheme {
                 val navController = rememberNavController()
                 val currentDestination by navController.currentBackStackEntryAsState()
+                var showSplash by rememberSaveable { mutableStateOf(true) }
 
-                NavigationSuiteScaffold(
-                    navigationSuiteItems = {
-                        AppDestinations.entries.forEach {
-                            item(
-                                icon = {
-                                    Icon(
-                                        it.icon,
-                                        contentDescription = stringResource(it.contentDescription)
-                                    )
-                                },
-                                label = { Text(stringResource(it.label)) },
-                                selected = currentDestination?.destination?.route == it.route,
-                                onClick = {
-                                    navController.navigate(it.route) {
-                                        launchSingleTop = true
-                                        restoreState = true
+                LaunchedEffect(Unit) {
+                    delay(2000)
+                    showSplash = false
+                }
+
+                if (showSplash) {
+                    SplashScreen()
+                } else {
+                    NavigationSuiteScaffold(
+                        navigationSuiteItems = {
+                            AppDestinations.entries.forEach {
+                                item(
+                                    icon = {
+                                        Icon(
+                                            it.icon,
+                                            contentDescription = stringResource(it.contentDescription)
+                                        )
+                                    },
+                                    label = { Text(stringResource(it.label)) },
+                                    selected = currentDestination?.destination?.route == it.route,
+                                    onClick = {
+                                        navController.navigate(it.route) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
-                                }
-                            )
-                        }
-                    },
+                                )
+                            }
+                        },
 
-                    ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = AppDestinations.MAP.route
-                    ) {
-                        composable(AppDestinations.MAP.route) {
-                            MapScreen(mapViewModel)
-                        }
+                        ) {
+                        NavHost(
+                            navController = navController,
+                            startDestination = AppDestinations.MAP.route
+                        ) {
+                            composable(AppDestinations.MAP.route) {
+                                MapScreen(mapViewModel)
+                            }
 
-                        composable(AppDestinations.HOME.route) {
-                            HomeScreen(mapViewModel)
-                        }
+                            composable(AppDestinations.HOME.route) {
+                                HomeScreen(mapViewModel)
+                            }
 
-                        composable(AppDestinations.COMPASS.route) {
-                            CompassScreen(mapViewModel)
+                            composable(AppDestinations.COMPASS.route) {
+                                CompassScreen(mapViewModel)
+                            }
                         }
                     }
                 }
@@ -103,6 +139,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 // Te dwa widoki sie potem przeniesie do osobnych plików czy coś
 
