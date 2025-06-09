@@ -1,4 +1,4 @@
-package com.example.pizzoompas.components
+package com.example.pizzoompas.screens
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -82,7 +82,7 @@ fun RotatingIcon() {
             .graphicsLayer(scaleX = scale.value, scaleY = scale.value)
     )
     Spacer(modifier = Modifier.height(80.dp))
-    Text("Pizzoompas!", color = Color.White,
+    Text("Pizzoompas!", color = MaterialTheme.colorScheme.onPrimary,
         modifier = Modifier
             .graphicsLayer(scaleX = scale.value, scaleY = scale.value)
     )

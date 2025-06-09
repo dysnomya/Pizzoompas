@@ -54,6 +54,7 @@ fun findClosestPizzeria(lat: Double, lng: Double, context: Context, mapViewModel
                         val lng = location.getDouble("lng")
 
                         mapViewModel.setClosestPizzeriaLatLng(lat, lng)
+                        mapViewModel.startNavigation()
 
                         Timber.tag("PlacesAPI")
                             .d("Closest Pizzeria: $name at $address ($lat, $lng)")

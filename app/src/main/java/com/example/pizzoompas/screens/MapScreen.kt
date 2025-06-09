@@ -1,4 +1,4 @@
-package com.example.pizzoompas.map
+package com.example.pizzoompas.screens
 
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -98,7 +98,7 @@ fun MapScreen(mapViewModel: MapViewModel) {
                     snippet = "This is where you are currently located." // Set the snippet for the marker
                 )
                 // Move the camera to the user's location with a zoom level of 10f
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 10f)
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
             }
 
             // If a location was selected from the search bar, place a marker there

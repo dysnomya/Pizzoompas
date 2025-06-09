@@ -28,6 +28,9 @@ class MapViewModel : ViewModel() {
     private val _closestPizzeria = mutableStateOf<LatLng?>(null)
     val closestPizzeria: State<LatLng?> = _closestPizzeria
 
+    private val _navigating = mutableStateOf<Boolean>(false)
+    val navigating: State<Boolean> = _navigating
+
     // Function to fetch the user's location and update the state
     fun fetchUserLocation(context: Context, fusedLocationClient: FusedLocationProviderClient) {
         // Check if the location permission is granted
@@ -71,6 +74,19 @@ class MapViewModel : ViewModel() {
     fun setClosestPizzeriaLatLng(lat: Double, lng: Double) {
         viewModelScope.launch {
             _closestPizzeria.value = LatLng(lat, lng)
+        }
+    }
+
+    fun startNavigation() {
+        viewModelScope.launch {
+            _navigating.value = true
+        }
+    }
+
+    fun cancelNavigation() {
+        viewModelScope.launch {
+            _navigating.value = false
+            _closestPizzeria.value = null
         }
     }
 }
