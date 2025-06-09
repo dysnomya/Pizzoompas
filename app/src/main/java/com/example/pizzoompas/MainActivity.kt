@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
                 var showSplash by rememberSaveable { mutableStateOf(true) }
 
                 LaunchedEffect(Unit) {
-                    delay(2000)
+                    delay(1500)
                     showSplash = false
                 }
 
@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                         NavHost(
                             navController = navController,
-                            startDestination = AppDestinations.MAP.route
+                            startDestination = AppDestinations.HOME.route
                         ) {
                             composable(AppDestinations.MAP.route) {
                                 MapScreen(mapViewModel)
