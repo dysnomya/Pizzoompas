@@ -21,11 +21,16 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.pizzoompas.viewmodel.PizzeriaViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.MarkerState
 import timber.log.Timber
 
 @Composable
-fun MapScreen(mapViewModel: MapViewModel) {
+fun MapScreen(
+    mapViewModel: MapViewModel,
+    pizzeriaViewModel: PizzeriaViewModel
+) {
     // Initialize the camera position state, which controls the camera's position on the map
     val cameraPositionState = rememberCameraPositionState()
     // Obtain the current context
@@ -34,36 +39,9 @@ fun MapScreen(mapViewModel: MapViewModel) {
     val userLocation by mapViewModel.userLocation
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     // Observe the selected location from the ViewModel
-    val selectedLocation by mapViewModel.selectedLocation
-    val closestPizzeria by mapViewModel.closestPizzeria
+    val currentPizzeria by pizzeriaViewModel.currentPizzeria
+    val currentPizzeriaLocation by mapViewModel.closestPizzeriaLocation
 
-    // Handle permission requests for accessing fine location
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            // Fetch the user's location and update the camera if permission is granted
-            mapViewModel.fetchUserLocation(context, fusedLocationClient)
-        } else {
-            // Handle the case when permission is denied
-            Timber.e("Location permission was denied by the user.")
-        }
-    }
-
-    // Request the location permission when the composable is launched
-    LaunchedEffect(Unit) {
-        when (PackageManager.PERMISSION_GRANTED) {
-            // Check if the location permission is already granted
-            ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                // Fetch the user's location and update the camera
-                mapViewModel.fetchUserLocation(context, fusedLocationClient)
-            }
-            else -> {
-                // Request the location permission if it has not been granted
-                permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-        }
-    }
 
     // Layout that includes the search bar and the map, arranged in a vertical column
     Column(modifier = Modifier.fillMaxSize()) {
@@ -94,29 +72,18 @@ fun MapScreen(mapViewModel: MapViewModel) {
             userLocation?.let {
                 Marker(
                     state = MarkerState(position = it), // Place the marker at the user's location
-                    title = "Your Location", // Set the title for the marker
-                    snippet = "This is where you are currently located." // Set the snippet for the marker
+                    title = "Jesteś tutaj", // Set the title for the marker
+                    snippet = "To jest twoja przybliżona aktualna lokalizacja" // Set the snippet for the marker
                 )
                 // Move the camera to the user's location with a zoom level of 10f
                 cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
             }
 
-            // If a location was selected from the search bar, place a marker there
-            selectedLocation?.let {
+            currentPizzeriaLocation?.let {
                 Marker(
                     state = MarkerState(position = it), // Place the marker at the selected location
-                    title = "Selected Location", // Set the title for the marker
-                    snippet = "This is the place you selected." // Set the snippet for the marker
-                )
-                // Move the camera to the selected location with a zoom level of 15f
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
-            }
-
-            closestPizzeria?.let {
-                Marker(
-                    state = MarkerState(position = it), // Place the marker at the selected location
-                    title = "Closest pizzeria", // Set the title for the marker
-                    snippet = "This pizzeria is the closest to your location." // Set the snippet for the marker
+                    title = currentPizzeria!!.name, // Set the title for the marker
+                    snippet = currentPizzeria!!.address // Set the snippet for the marker
                 )
                 // Move the camera to the selected location with a zoom level of 15f
                 cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)

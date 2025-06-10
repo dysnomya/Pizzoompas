@@ -3,7 +3,6 @@ package com.example.pizzoompas.viewmodel
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.core.content.ContextCompat
@@ -25,8 +24,8 @@ class MapViewModel : ViewModel() {
     private val _selectedLocation = mutableStateOf<LatLng?>(null)
     val selectedLocation: State<LatLng?> = _selectedLocation
 
-    private val _closestPizzeria = mutableStateOf<LatLng?>(null)
-    val closestPizzeria: State<LatLng?> = _closestPizzeria
+    private val _closestPizzeriaLocation = mutableStateOf<LatLng?>(null)
+    val closestPizzeriaLocation: State<LatLng?> = _closestPizzeriaLocation
 
     private val _navigating = mutableStateOf<Boolean>(false)
     val navigating: State<Boolean> = _navigating
@@ -73,7 +72,7 @@ class MapViewModel : ViewModel() {
 
     fun setClosestPizzeriaLatLng(lat: Double, lng: Double) {
         viewModelScope.launch {
-            _closestPizzeria.value = LatLng(lat, lng)
+            _closestPizzeriaLocation.value = LatLng(lat, lng)
         }
     }
 
@@ -86,7 +85,7 @@ class MapViewModel : ViewModel() {
     fun cancelNavigation() {
         viewModelScope.launch {
             _navigating.value = false
-            _closestPizzeria.value = null
+            _closestPizzeriaLocation.value = null
         }
     }
 }

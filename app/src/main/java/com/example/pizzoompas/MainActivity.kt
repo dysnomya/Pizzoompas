@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CompassCalibration
@@ -21,10 +22,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.pizzoompas.model.PizzeriaDatabase
 import com.example.pizzoompas.screens.MapScreen
 import com.example.pizzoompas.ui.theme.PizzoompasTheme
 import com.example.pizzoompas.utils.ManifestUtils
@@ -34,6 +40,7 @@ import kotlinx.coroutines.delay
 import com.example.pizzoompas.screens.SplashScreen
 import com.example.pizzoompas.screens.CompassScreen
 import com.example.pizzoompas.screens.HomeScreen
+import com.example.pizzoompas.viewmodel.PizzeriaViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -49,12 +56,27 @@ class MainActivity : ComponentActivity() {
         if (!Places.isInitialized() && apiKey != null) {
             Places.initialize(applicationContext, apiKey)
         }
-        val mapViewModel = MapViewModel()
+
         setContent {
+            val mapViewModel : MapViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return MapViewModel() as T
+                    }
+                }
+            )
+            val pizzeriaViewModel : PizzeriaViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return PizzeriaViewModel(PizzeriaDatabase.getDatabase(applicationContext).pizzeriaDao()) as T
+                    }
+                }
+            )
             PizzoompasTheme {
                 val navController = rememberNavController()
                 val currentDestination by navController.currentBackStackEntryAsState()
                 var showSplash by rememberSaveable { mutableStateOf(true) }
+
 
                 LaunchedEffect(Unit) {
                     delay(1500)
@@ -92,11 +114,11 @@ class MainActivity : ComponentActivity() {
                             startDestination = AppDestinations.HOME.route
                         ) {
                             composable(AppDestinations.MAP.route) {
-                                MapScreen(mapViewModel)
+                                MapScreen(mapViewModel, pizzeriaViewModel)
                             }
 
                             composable(AppDestinations.HOME.route) {
-                                HomeScreen(mapViewModel)
+                                HomeScreen(mapViewModel, pizzeriaViewModel)
                             }
 
                             composable(AppDestinations.COMPASS.route) {

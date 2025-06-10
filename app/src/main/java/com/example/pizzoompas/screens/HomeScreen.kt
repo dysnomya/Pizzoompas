@@ -1,38 +1,75 @@
 package com.example.pizzoompas.screens
 
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import coil.compose.AsyncImage
 import com.example.pizzoompas.utils.findClosestPizzeria
 import com.example.pizzoompas.viewmodel.MapViewModel
+import com.example.pizzoompas.viewmodel.PizzeriaViewModel
 import com.google.android.gms.location.LocationServices
+import timber.log.Timber
 
 @Composable
-fun HomeScreen(mapViewModel: MapViewModel) {
+fun HomeScreen(
+    mapViewModel: MapViewModel,
+    pizzeriaViewModel: PizzeriaViewModel
+) {
     val context = LocalContext.current
     val userLocation by mapViewModel.userLocation
     val navigating by mapViewModel.navigating
+    val closestPizzeriaLocation by mapViewModel.closestPizzeriaLocation
+    val currentPizzeria by pizzeriaViewModel.currentPizzeria
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     mapViewModel.fetchUserLocation(context, fusedLocationClient)
+
+
+    // Handle permission requests for accessing fine location
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // Fetch the user's location and update the camera if permission is granted
+            mapViewModel.fetchUserLocation(context, fusedLocationClient)
+        } else {
+            // Handle the case when permission is denied
+            Timber.e("Location permission was denied by the user.")
+        }
+    }
+
+    // Request the location permission when the composable is launched
+    LaunchedEffect(Unit) {
+        when (PackageManager.PERMISSION_GRANTED) {
+            // Check if the location permission is already granted
+            ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // Fetch the user's location and update the camera
+                mapViewModel.fetchUserLocation(context, fusedLocationClient)
+            }
+            else -> {
+                // Request the location permission if it has not been granted
+                permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -51,7 +88,8 @@ fun HomeScreen(mapViewModel: MapViewModel) {
             if (!navigating) {
                 Button(
                     onClick = {
-                        findClosestPizzeria(userLocation!!.latitude, userLocation!!.longitude, context, mapViewModel)
+                        findClosestPizzeria(userLocation?.latitude ?: 0.0,
+                            userLocation?.longitude ?: 0.0, context, mapViewModel, pizzeriaViewModel)
                     }
                 ) {
                     Text("Znajdź najbliższą pizzerię", color = MaterialTheme.colorScheme.onPrimary)
@@ -76,9 +114,14 @@ fun HomeScreen(mapViewModel: MapViewModel) {
             if (!navigating) {
                 Text("Tutaj pojawią się informacje o znalezionej pizzerii", color = MaterialTheme.colorScheme.onBackground)
             } else {
-                Text("Nazwa pizzerii")
-                Text("Dane pizzerii")
-                Text("Bla bla bla")
+                AsyncImage(
+                    model = currentPizzeria?.iconURL,
+                    contentDescription = null
+                )
+                Text(currentPizzeria?.name ?: "Nazwa pizzerii")
+                Text(currentPizzeria?.address ?: "Adres pizzerii")
+                Text(String.format("Opinie: " + currentPizzeria?.rating))
+                Text(String.format("Liczba opinii: " + currentPizzeria?.userRatingsTotal))
             }
 
         }

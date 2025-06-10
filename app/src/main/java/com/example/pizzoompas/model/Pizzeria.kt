@@ -1,13 +1,16 @@
 package com.example.pizzoompas.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@Parcelize
+@Entity(tableName = "pizzerias")
 data class Pizzeria(
-    val id: String? = null,
-    val displayName: String? = null,
-    val formatedAddress: String? = null,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val address: String,
+    val rating: Double,
+    val userRatingsTotal: Int,
+    val iconURL: String,
     val latitude: Double = 0.0,
     val longitude: Double = 0.0
-): Parcelable
+)
