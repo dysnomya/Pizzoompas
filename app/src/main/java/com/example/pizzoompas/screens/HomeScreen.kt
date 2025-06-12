@@ -43,34 +43,6 @@ fun HomeScreen(
     mapViewModel.fetchUserLocation(context, fusedLocationClient)
 
 
-    // Handle permission requests for accessing fine location
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            // Fetch the user's location and update the camera if permission is granted
-            mapViewModel.fetchUserLocation(context, fusedLocationClient)
-        } else {
-            // Handle the case when permission is denied
-            Timber.e("Location permission was denied by the user.")
-        }
-    }
-
-    // Request the location permission when the composable is launched
-    LaunchedEffect(Unit) {
-        when (PackageManager.PERMISSION_GRANTED) {
-            // Check if the location permission is already granted
-            ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                // Fetch the user's location and update the camera
-                mapViewModel.fetchUserLocation(context, fusedLocationClient)
-            }
-            else -> {
-                // Request the location permission if it has not been granted
-                permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize(),
