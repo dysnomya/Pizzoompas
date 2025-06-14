@@ -1,5 +1,6 @@
 package com.example.pizzoompas.screens
 
+import android.location.Location
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pizzoompas.viewmodel.MapViewModel
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.example.pizzoompas.R
+import com.example.pizzoompas.utils.CompassManager
+import com.example.pizzoompas.utils.UPDATE_FREQUENCY
+
+val COMPASS_PADDING = 16.dp
+
 
 @Composable
 fun CompassScreen(mapViewModel: MapViewModel) {
@@ -18,9 +49,140 @@ fun CompassScreen(mapViewModel: MapViewModel) {
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        var azimuth by remember { mutableFloatStateOf(0f) }
+
+        CompassHeading (
+        ) { newAzimuth ->
+            azimuth = newAzimuth
+        }
+
+        Compass(direction = 60, rotation = azimuth.toInt())
+
         Spacer(modifier = Modifier.height(200.dp))
-        Text("Tu kompas")
         Spacer(modifier = Modifier.height(100.dp))
         Text("Tu odległość")
     }
+}
+
+@Composable
+fun CompassHeading(onAzimuthUpdate: (Float) -> Unit) {
+    val context = LocalContext.current
+    val compass = remember { CompassManager(context) }
+
+    DisposableEffect(Unit) {
+        compass.onAzimuthChanged = onAzimuthUpdate
+        compass.startListening()
+
+        onDispose {
+            compass.stopListening()
+        }
+    }
+}
+
+@Composable
+fun Compass(
+    direction: Int?,
+    rotation: Int
+) {
+    val (lastRotation, setLastRotation) = remember { mutableStateOf(0) }
+    var newRotation = lastRotation
+    val modLast = if (lastRotation > 0) lastRotation % 360 else 360 - (-lastRotation % 360)
+
+    if (modLast != rotation)
+    {
+        // new rotation comes in
+        val backward = if (rotation > modLast) modLast + 360 - rotation else modLast - rotation
+        val forward = if (rotation > modLast) rotation - modLast else 360 - modLast + rotation
+
+        newRotation = if (backward < forward)
+        {
+            // backward rotation is shorter
+            lastRotation - backward
+        }
+        else
+        {
+            // forward rotation is shorter (or they are equals)
+            lastRotation + forward
+        }
+
+        setLastRotation(newRotation)
+    }
+
+    val angle: Float by animateFloatAsState(
+        targetValue = -newRotation.toFloat(),
+        animationSpec = tween(
+            durationMillis = UPDATE_FREQUENCY,
+            easing = LinearEasing
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .padding(COMPASS_PADDING),
+        contentAlignment = Alignment.Center
+    ) {
+        Rose(angle = angle, rotation = rotation)
+
+
+        if (direction != null) {
+            CompassDirectionPointer(
+                angle = angle + direction.toFloat(),
+                pointerIcon = R.drawable.slice,
+                contentDsc = R.string.destination_direction
+            )
+        }
+
+        CompassDirectionPointer(
+            pointerIcon = R.drawable.ic_line,
+            contentDsc = R.string.phone_direction,
+        )
+
+    }
+}
+
+@Composable
+fun Rose(
+    angle: Float,
+    rotation: Int,
+    modifier: Modifier = Modifier
+) {
+    Image(
+        modifier = modifier
+            .fillMaxSize()
+            .rotate(angle),
+        painter = painterResource(id = R.drawable.ic_rose),
+        contentDescription = stringResource(id = R.string.compass),
+        contentScale = ContentScale.Fit,
+        colorFilter = ColorFilter.tint(
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    )
+
+    Text(
+        modifier = modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.Center),
+        text = stringResource(id = R.string.degree_format, rotation),
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.headlineLarge
+    )
+}
+
+@Composable
+fun CompassDirectionPointer(
+    @DrawableRes pointerIcon: Int,
+    @StringRes contentDsc: Int,
+    modifier: Modifier = Modifier,
+    angle: Float = 0f,
+)
+{
+    Image(
+        modifier = modifier
+            .padding(COMPASS_PADDING)
+            .rotate(angle)
+            .fillMaxSize(),
+        painter = painterResource(id = pointerIcon),
+        contentDescription = stringResource(id = contentDsc),
+        contentScale = ContentScale.Fit,
+    )
 }
