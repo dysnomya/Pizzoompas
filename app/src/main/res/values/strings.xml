@@ -30,4 +30,5 @@
     <string name="give_location_permission">give location permission</string>
     <string name="turn_on_gps_to_see_distance">Turn on GPS to see distance</string>
     <string name="explain_permission_request">This app needs localization permission to be able to show You distance and direction to given destination. Go to settings and give us permission.</string>
+    <string name="meter_format">%dm</string>
 </resources>

@@ -2,9 +2,7 @@ package com.example.pizzoompas.screens
 
 import android.location.Location
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,15 +27,17 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.example.pizzoompas.R
 import com.example.pizzoompas.utils.CompassManager
 import com.example.pizzoompas.utils.UPDATE_FREQUENCY
+import com.example.pizzoompas.utils.toLocation
 
 val COMPASS_PADDING = 16.dp
 
@@ -49,28 +49,49 @@ fun CompassScreen(mapViewModel: MapViewModel) {
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var azimuth by remember { mutableFloatStateOf(0f) }
+        var rotation by remember { mutableFloatStateOf(0f) }
+        var direction by remember { mutableStateOf<Float?>(null) }
+        var distanceMeters by remember { mutableStateOf<Float?>(null) }
 
-        CompassHeading (
-        ) { newAzimuth ->
-            azimuth = newAzimuth
-        }
+        val destinationLocation by mapViewModel.closestPizzeriaLocation
+        val currentLocation by mapViewModel.userLocation
 
-        Compass(direction = 60, rotation = azimuth.toInt())
+        CompassHeading(
+            destination = destinationLocation?.toLocation(),
+            currentLocation = currentLocation?.toLocation(),
+            onAzimuthUpdate = { newRotation, newDirection ->
+                rotation = newRotation
+                direction = newDirection
+            },
+            onDistanceUpdate = { newDistance ->
+                distanceMeters = newDistance
+            }
+        )
 
-        Spacer(modifier = Modifier.height(200.dp))
-        Spacer(modifier = Modifier.height(100.dp))
-        Text("Tu odległość")
+        Compass(direction = direction?.toInt(), rotation = rotation.toInt(), distance = distanceMeters)
+
+//        Spacer(modifier = Modifier.height(200.dp))
+//        Spacer(modifier = Modifier.height(100.dp))
     }
 }
 
 @Composable
-fun CompassHeading(onAzimuthUpdate: (Float) -> Unit) {
+fun CompassHeading(
+        destination: Location?, currentLocation: Location?,
+        onAzimuthUpdate: (rotation: Float, direction: Float?) -> Unit,
+        onDistanceUpdate: (Float?) -> Unit
+    ) {
     val context = LocalContext.current
     val compass = remember { CompassManager(context) }
 
+    LaunchedEffect(destination, currentLocation) {
+        compass.destination = destination
+        compass.currentLocation = currentLocation
+    }
+
     DisposableEffect(Unit) {
         compass.onAzimuthChanged = onAzimuthUpdate
+        compass.onDistanceChanged = onDistanceUpdate
         compass.startListening()
 
         onDispose {
@@ -82,7 +103,8 @@ fun CompassHeading(onAzimuthUpdate: (Float) -> Unit) {
 @Composable
 fun Compass(
     direction: Int?,
-    rotation: Int
+    rotation: Int,
+    distance: Float?,
 ) {
     val (lastRotation, setLastRotation) = remember { mutableStateOf(0) }
     var newRotation = lastRotation
@@ -116,34 +138,32 @@ fun Compass(
         )
     )
 
-    Box(
-        modifier = Modifier
-            .padding(COMPASS_PADDING),
-        contentAlignment = Alignment.Center
-    ) {
-        Rose(angle = angle, rotation = rotation)
+    Column()
+    {
+        Box(
+            modifier = Modifier
+                .padding(COMPASS_PADDING),
+            contentAlignment = Alignment.Center
+        ) {
+            if (direction != null) {
+                CompassDirectionPointer(
+                    angle = angle + direction.toFloat(),
+                    pointerIcon = R.drawable.slice,
+                    contentDsc = R.string.destination_direction
+                )
+            }
 
-
-        if (direction != null) {
-            CompassDirectionPointer(
-                angle = angle + direction.toFloat(),
-                pointerIcon = R.drawable.slice,
-                contentDsc = R.string.destination_direction
-            )
+            Rose(angle = angle, distance = distance)
         }
-
-        CompassDirectionPointer(
-            pointerIcon = R.drawable.ic_line,
-            contentDsc = R.string.phone_direction,
-        )
-
     }
+
+
 }
 
 @Composable
 fun Rose(
     angle: Float,
-    rotation: Int,
+    distance: Float?,
     modifier: Modifier = Modifier
 ) {
     Image(
@@ -162,7 +182,7 @@ fun Rose(
         modifier = modifier
             .fillMaxSize()
             .wrapContentSize(Alignment.Center),
-        text = stringResource(id = R.string.degree_format, rotation),
+        text = stringResource(id = R.string.meter_format, (distance ?: 0f).toInt()),
         color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.headlineLarge
     )
@@ -178,9 +198,10 @@ fun CompassDirectionPointer(
 {
     Image(
         modifier = modifier
+            .fillMaxWidth(0.5f)
             .padding(COMPASS_PADDING)
-            .rotate(angle)
-            .fillMaxSize(),
+            .rotate(degrees = angle)
+            .offset(y = 100.dp),
         painter = painterResource(id = pointerIcon),
         contentDescription = stringResource(id = contentDsc),
         contentScale = ContentScale.Fit,

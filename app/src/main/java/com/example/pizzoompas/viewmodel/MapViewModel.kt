@@ -3,12 +3,13 @@ package com.example.pizzoompas.viewmodel
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.location.Location
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,6 +31,10 @@ class MapViewModel : ViewModel() {
     private val _navigating = mutableStateOf<Boolean>(false)
     val navigating: State<Boolean> = _navigating
 
+    private var fusedLocationClient: FusedLocationProviderClient? = null
+    private var locationCallback: LocationCallback? = null
+
+
     // Function to fetch the user's location and update the state
     fun fetchUserLocation(context: Context, fusedLocationClient: FusedLocationProviderClient) {
         // Check if the location permission is granted
@@ -42,12 +47,43 @@ class MapViewModel : ViewModel() {
                         val userLatLng = LatLng(it.latitude, it.longitude)
                         _userLocation.value = userLatLng
                     }
+
                 }
             } catch (e: SecurityException) {
                 Timber.e("Permission for location access was revoked: ${e.localizedMessage}")
             }
         } else {
             Timber.e("Location permission is not granted.")
+        }
+    }
+
+    fun startLocationUpdates(context: Context, fusedLocationClient: FusedLocationProviderClient) {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
+            .setMinUpdateDistanceMeters(1f)
+            .build()
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                super.onLocationResult(result)
+                val location = result.lastLocation ?: return
+
+                // Update the state with new location
+                val latLng = LatLng(location.latitude, location.longitude)
+                _userLocation.value = latLng
+            }
+        }
+        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback!!,
+                null
+            )
+        }
+    }
+
+    fun stopLocationUpdates() {
+        locationCallback?.let {
+            fusedLocationClient?.removeLocationUpdates(it)
         }
     }
 

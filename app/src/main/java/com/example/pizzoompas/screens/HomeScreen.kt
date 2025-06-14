@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -56,8 +58,9 @@ fun HomeScreen(
     val closestPizzeriaLocation by mapViewModel.closestPizzeriaLocation
     val currentPizzeria by pizzeriaViewModel.currentPizzeria
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    mapViewModel.fetchUserLocation(context, fusedLocationClient)
+//    mapViewModel.fetchUserLocation(context, fusedLocationClient)
 
+    mapViewModel.startLocationUpdates(context, fusedLocationClient)
 
     Column(
         modifier = Modifier
@@ -100,7 +103,8 @@ fun HomeScreen(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
                 .fillMaxSize()
-                .padding(20.dp),
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
