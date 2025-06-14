@@ -5,7 +5,7 @@ import androidx.room.*
 
 @Dao
 interface PizzeriaDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(pizzeria: Pizzeria)
     @Update
     suspend fun update(pizzeria: Pizzeria)

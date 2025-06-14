@@ -82,7 +82,7 @@ fun findClosestPizzeria(
                         )
                         //pizzeriaViewModel.deleteAll()
                         pizzeriaViewModel.insert(pizzeria)
-                        pizzeriaViewModel.getPizzeriaByLatLng(lat, lng)
+                        
                         mapViewModel.setClosestPizzeriaLatLng(lat, lng)
                         mapViewModel.startNavigation()
 

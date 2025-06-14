@@ -17,6 +17,7 @@ class PizzeriaViewModel(private val pizzeriaDao: PizzeriaDao) : ViewModel() {
     fun insert(pizzeria: Pizzeria) {
         viewModelScope.launch {
             pizzeriaDao.insert(pizzeria)
+            getPizzeriaByLatLng(pizzeria.latitude, pizzeria.longitude)
         }
     }
     fun update(pizzeria: Pizzeria) {
