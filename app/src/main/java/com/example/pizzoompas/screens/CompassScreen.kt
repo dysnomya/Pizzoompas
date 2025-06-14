@@ -147,7 +147,7 @@ fun Compass(
         ) {
             if (direction != null) {
                 CompassDirectionPointer(
-                    angle = angle + direction.toFloat(),
+                    angle = angle + direction.toFloat() +180,
                     pointerIcon = R.drawable.slice,
                     contentDsc = R.string.destination_direction
                 )
@@ -198,10 +198,10 @@ fun CompassDirectionPointer(
 {
     Image(
         modifier = modifier
-            .fillMaxWidth(0.5f)
+            .fillMaxWidth(0.7f)
             .padding(COMPASS_PADDING)
             .rotate(degrees = angle)
-            .offset(y = 100.dp),
+            .offset(y = 80.dp),
         painter = painterResource(id = pointerIcon),
         contentDescription = stringResource(id = contentDsc),
         contentScale = ContentScale.Fit,
