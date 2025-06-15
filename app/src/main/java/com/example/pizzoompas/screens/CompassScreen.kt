@@ -25,8 +25,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.DisposableEffect
@@ -177,11 +180,11 @@ fun Rose(
             color = MaterialTheme.colorScheme.onBackground
         )
     )
-
     Text(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .wrapContentSize(Alignment.Center),
+            .wrapContentSize(Alignment.Center)
+            .padding(top = 575.dp),
         text = stringResource(id = R.string.meter_format, (distance ?: 0f).toInt()),
         color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.headlineLarge
@@ -198,10 +201,10 @@ fun CompassDirectionPointer(
 {
     Image(
         modifier = modifier
-            .fillMaxWidth(0.7f)
+            .fillMaxWidth(0.63f)
             .padding(COMPASS_PADDING)
             .rotate(degrees = angle)
-            .offset(y = 80.dp),
+            .offset(y = 90.dp),
         painter = painterResource(id = pointerIcon),
         contentDescription = stringResource(id = contentDsc),
         contentScale = ContentScale.Fit,

@@ -3,6 +3,7 @@ package com.example.pizzoompas.screens
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,6 +48,8 @@ import com.example.pizzoompas.viewmodel.PizzeriaViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.delay
 import timber.log.Timber
+import com.example.pizzoompas.R
+import com.example.pizzoompas.components.RotatingPizza
 
 @Composable
 fun HomeScreen(
@@ -109,13 +113,18 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center
         ) {
             if (!navigating) {
-                Text("Tutaj pojawią się informacje o znalezionej pizzerii", color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
+                RotatingPizza()
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Nic teraz nie szukamy...",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp)
             } else {
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(300.dp)
-                        .border(2.dp, MaterialTheme.colorScheme.primary, shape = CircleShape)
+                        .size(250.dp)
+                        .border(3.dp, MaterialTheme.colorScheme.primary, shape = CircleShape)
                 ) {
                     AsyncImage(
                         model = currentPizzeria?.iconURL,
@@ -126,11 +135,11 @@ fun HomeScreen(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                Text(currentPizzeria?.name ?: "Nazwa pizzerii", fontWeight = FontWeight.Bold, fontSize = 30.sp)
+                Text(currentPizzeria?.name ?: "Nazwa pizzerii", fontWeight = FontWeight.Bold, fontSize = 30.sp, textAlign = TextAlign.Center)
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(currentPizzeria?.address ?: "Adres pizzerii")
-                Text(String.format("Opinie: " + currentPizzeria?.rating))
-                Text(String.format("Liczba opinii: " + currentPizzeria?.userRatingsTotal))
+                Text(currentPizzeria?.address ?: "Adres pizzerii", textAlign = TextAlign.Center)
+                Text(String.format("Opinie: " + currentPizzeria?.rating), textAlign = TextAlign.Center)
+                Text(String.format("Liczba opinii: " + currentPizzeria?.userRatingsTotal), textAlign = TextAlign.Center)
             }
 
         }

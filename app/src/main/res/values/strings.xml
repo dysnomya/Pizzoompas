@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Pizzoompas</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="map">Map</string>
-    <string name="mapDescription">Navigate to map</string>
-    <string name="home">Home</string>
-    <string name="homeDescription">Navigate to home</string>
-    <string name="compass">Compass</string>
-    <string name="compassDescription">Navigate to compass</string>
+    <string name="map">Mapa</string>
+    <string name="mapDescription">Mapa</string>
+    <string name="home">Główna</string>
+    <string name="homeDescription">Główna strona</string>
+    <string name="compass">Kompas</string>
+    <string name="compassDescription">Kompas</string>
 
     <string name="pick_one">Pick one</string>
     <string name="cord_format">%s°, %s°</string>
