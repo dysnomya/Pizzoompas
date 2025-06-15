@@ -1,6 +1,8 @@
 package com.example.pizzoompas.screens
 
+import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.pizzoompas.viewmodel.PizzeriaViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MarkerState
 import timber.log.Timber
 
@@ -63,10 +67,33 @@ fun MapScreen(
 //            Text("Find nearest pizzeria!")
 //        }
 
+        val hasLocationPermission = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        // Remember the map properties
+        val mapProperties = remember {
+            MapProperties(
+                isMyLocationEnabled = hasLocationPermission
+            )
+        }
+
+        val mapUiSettings = remember {
+            MapUiSettings(myLocationButtonEnabled = true)
+        }
+
         // Display the Google Map
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState
+            cameraPositionState = cameraPositionState,
+            properties = mapProperties,
+            uiSettings = mapUiSettings,
+            onMyLocationButtonClick = {
+                false
+            },
+            onMyLocationClick = {
+                Timber.tag("Map").d("Current location: $it")
+            }
         ) {
             // If the user's location is available, place a marker on the map
             userLocation?.let {
